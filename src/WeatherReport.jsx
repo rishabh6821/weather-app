@@ -1,7 +1,7 @@
 // WeatherReport.jsx
 import { useEffect, useState } from "react";
 
-export default function WeatherReport({ city }) {
+export default function WeatherReport({ city, onTimezoneUpdate, onCityNameUpdate }) {
   const [weather, setWeather] = useState(null);
   const [error, setError] = useState(null);
 
@@ -21,30 +21,32 @@ export default function WeatherReport({ city }) {
       .then((data) => {
         setWeather(data);
         setError(null);
+        if (onTimezoneUpdate) onTimezoneUpdate(data.timezone);
+        if (onCityNameUpdate) onCityNameUpdate(data.name);
       })
       .catch((err) => {
         setError(err.message);
         setWeather(null);
+        if (onTimezoneUpdate) onTimezoneUpdate(null);
+        if (onCityNameUpdate) onCityNameUpdate("");
       });
-  }, [city]);
+  }, [city, onTimezoneUpdate, onCityNameUpdate]);
 
   if (error) {
     return <p style={{ color: "red" }}>⚠️ {error}</p>;
   }
 
   if (!weather) {
-    return <p>Loading weather data...</p>;
+    return <p className="status-message">Loading weather data...</p>;
   }
 
   return (
-    <>
-    <div style={{ marginTop: "20px" }}>
-      <h2 style={{color: 'var(--text-color)', textDecoration: 'underline'}}>{weather.name}</h2>
-      <p color={{color: 'var(--secondary-color)'}}>🌡️ Temperature: {weather.main.temp}°C</p>
-      <p color={{color: 'var(--secondary-color)'}}>🌥️ Condition: {weather.weather[0].description}</p>
-      <p color={{color: 'var(--secondary-color)'}}>💨 Wind: {weather.wind.speed} m/s</p>
-      <p color={{color: 'var(--secondary-color)'}}>💧 Humidity: {weather.main.humidity}%</p>
-    </div>
-    </>
+    <section className="weather-card">
+      <h2 className="weather-title">{weather.name}</h2>
+      <p className="weather-temp">{weather.main.temp}°C</p>
+      <p className="weather-detail">🌥️ Condition: {weather.weather[0].description}</p>
+      <p className="weather-detail">💨 Wind: {weather.wind.speed} m/s</p>
+      <p className="weather-detail">💧 Humidity: {weather.main.humidity}%</p>
+    </section>
   );
 }
